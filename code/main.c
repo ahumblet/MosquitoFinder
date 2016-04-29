@@ -51,7 +51,6 @@ int main(void)
     SystemInit();
 
 	while (1) {
-		printf("Hello from main of my homework2 test main\n");
 	}
 }
 
