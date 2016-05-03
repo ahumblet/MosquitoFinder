@@ -1,8 +1,10 @@
 # Source files 
 SRCS=main.c system_stm32f4xx.c
 
+MIC_SRCS = mic/microphone_functions.c mic/microphone.c mic/sound_loudness.c STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_f32.c #mic/waverecorder.c
+SRCS += $(MIC_SRCS)
 # Binary will be generated with this name (with .elf filename extension)
-PROJ_NAME=MosquitoFinder
+PROJ_NAME=MFind
 
 # You should not need to change anything below this line!
 #######################################################################################
@@ -66,7 +68,7 @@ SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c
 
 OBJS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SRCS))))
 
-SEMIHOSTING_FLAGS = --specs=rdimon.specs -lc -lrdimon 
+SEMIHOSTING_FLAGS = --specs=rdimon.specs -lc -lrdimon -D ARM_MATH_CM4
 
 ELF = $(PROJ_NAME).elf
 BIN = $(PROJ_NAME).bin
@@ -85,7 +87,7 @@ $(BUILDDIR)/%.o: %.s
 all: $(ELF) $(BIN)
 
 $(ELF): $(OBJS)
-	$(LD) $(LDFLAGS) $(SEMIHOSTING_FLAGS) $(CFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) $(SEMIHOSTING_FLAGS) $(CFLAGS) -o $@ $(OBJS) -L$(STM_COMMON)/Utilities/STM32F4-Discovery -lPDMFilter_IAR
 	$(SIZE) $@
 
 $(BIN): $(ELF)
