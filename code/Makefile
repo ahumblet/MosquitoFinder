@@ -1,7 +1,7 @@
 # Source files 
 SRCS=main.c system_stm32f4xx.c
 
-MIC_SRCS = mic/microphone_functions.c mic/microphone.c mic/sound_loudness.c STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_f32.c #mic/waverecorder.c
+MIC_SRCS = mic/microphone_functions.c mic/microphone.c mic/sound_loudness.c STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_rms_f32.c mic/tm_stm32f4_fft.c mic/tm_stm32f4_adc.c mic/tm_stm32f4_dac_signal.c mic/tm_stm32f4_disco.c  mic/tm_stm32f4_delay.c mic/tm_stm32f4_timer_properties.c #mic/tm_stm32f4_sdram.c
 SRCS += $(MIC_SRCS)
 # Binary will be generated with this name (with .elf filename extension)
 PROJ_NAME=MFind
