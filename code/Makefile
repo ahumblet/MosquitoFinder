@@ -44,6 +44,7 @@ CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_spi
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_dma
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_spi_dma
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_fonts
+CFLAGS += -Iserial_port_usb -I$(USB_DEVICE_LIBRARY)/Core/inc -I$(USB_DEVICE_LIBRARY)/Class/cdc/inc -Iserial_port_usb/USB_OTG/inc
 
 
 
@@ -70,6 +71,15 @@ SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_f32.c
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_f32.c
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c
+
+SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
+SERIAL_PORT_USB_SRCS = stm32f4xx_it.c serial_port_usb/serial_port_usb.c serial_port_usb/usb_bsp.c serial_port_usb/usbd_cdc_vcp.c serial_port_usb/usbd_desc.c serial_port_usb/usbd_usr.c
+SERIAL_PORT_USB_SRCS += serial_port_usb/USB_OTG/src/usb_core.c serial_port_usb/USB_OTG/src/usb_dcd.c serial_port_usb/USB_OTG/src/usb_dcd_int.c serial_port_usb/USB_OTG/src/usb_hcd.c serial_port_usb/USB_OTG/src/usb_hcd_int.c serial_port_usb/USB_OTG/src/usb_otg.c
+USB_DEVICE_LIBRARY = $(STM_COMMON)/Libraries/STM32_USB_Device_Library
+SERIAL_PORT_USB_SRCS += $(USB_DEVICE_LIBRARY)/Core/src/usbd_core.c $(USB_DEVICE_LIBRARY)/Core/src/usbd_ioreq.c $(USB_DEVICE_LIBRARY)/Core/src/usbd_req.c
+SERIAL_PORT_USB_SRCS += $(USB_DEVICE_LIBRARY)/Class/cdc/src/usbd_cdc_core.c
+
+SRCS += $(SERIAL_PORT_USB_SRCS)
 OBJS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SRCS))))
 #OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4bf_math.lib
 #OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4b_math.lib

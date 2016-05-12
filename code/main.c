@@ -7,7 +7,66 @@
 #include <stdlib.h>
 
 
-#define FFT
+#define SERIAL
+
+#ifdef SERIAL
+#include "serial_port_usb/serial_port_usb.h"
+void read_line_from_serial_usb(char *s)
+{
+  while (1)
+  {
+    uint8_t c;
+    uint8_t read_byte = read_serial_usb_byte(&c); // read one character
+    if (read_byte == 1) // if a character was read
+    {
+      write_serial_usb_bytes(&c,1); // echo the character back to the USB serial port
+      *s = c; s++;
+      if ( (c == '\n') || (c == '\r') ) break; // line feed or carriage return ASCII codes
+    }
+  }
+}
+
+// wait for a character from the serial port
+void wait_for_byte_from_serial_usb()
+{
+  while(1)
+  {
+    uint8_t c;
+    uint8_t read_byte = read_serial_usb_byte(&c); // read one character
+    if (read_byte == 1) // if a character was read
+      return;
+  }
+}
+
+static void init_systick();
+static void delay_ms(uint32_t n);
+static volatile uint32_t msTicks; // counts 1 ms timeTicks
+
+// SysTick Handler (Interrupt Service Routine for the System Tick interrupt)
+void SysTick_Handler(void)
+{
+  msTicks++;
+}
+
+// initialize the system tick
+void init_systick(void)
+{
+	SystemCoreClockUpdate();                      /* Get Core Clock Frequency   */
+  if (SysTick_Config(SystemCoreClock / 1000)) { /* SysTick 1 msec interrupts  */
+    while (1);                                  /* Capture error              */
+  }
+}
+
+// pause for a specified number (n) of milliseconds
+void delay_ms(uint32_t n)
+{
+  uint32_t msTicks2 = msTicks + n;
+  while(msTicks < msTicks2) ;
+}
+
+#endif
+
+
 
 #ifdef FFT
 #include "math.h"
@@ -38,7 +97,7 @@ int main(void)
 {
   //Initialize system
   SystemInit();
-	
+  	
 
 #ifdef SLAVE
   TM_SPI_Init(SPI3, TM_SPI_PinsPack_1);
@@ -66,8 +125,32 @@ int main(void)
   printf("The Max Value is: %f, at %d\n", maxValue, testIndex);
 #endif
 
+#ifdef SERIAL
+init_systick();
+init_serial_port_usb();
+char s[128];
+delay_ms(3000);
+int n_input = 0;
+#endif
+
 
 while (1) {
+
+#ifdef SERIAL
+write_serial_usb_bytes("Hello\n", 6);
+while (1)
+    {
+      uint8_t c;
+      uint8_t read_byte = read_serial_usb_byte(&c); // read one character
+      if (read_byte == 1) // if a character was read
+      {
+        write_serial_usb_bytes(&c,1); // echo the character back to the USB serial port
+        n_input ++;
+      }
+      else break; // if no more characters at the current time
+    }
+delay_ms(1000);
+#endif
 
 #ifdef SLAVE
   if(!TM_GPIO_GetInputPinValue(GPIOB, GPIO_PIN_9)){
