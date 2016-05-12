@@ -1,20 +1,20 @@
-/******************************************************************************
-Тестовая программа реализации работы LCD 2.2 дюйма драйвер ILI9341
-******************************************************************************/
-
-//#include "stm32l1xx.h"
 #include "stm32f4xx.h"
-
-//#include "stm32l1xx_conf.h" // подключить все хидеры (ADC, GPIO, TIM и т.д.)
 #include "stm32f4xx_conf.h"
-
-//stuff for the screen
-#include "stm32f4xx.h"
-#include "stm32f4xx_spi.h"
 #include "defines.h"
-#include "tm_stm32f4_ili9341.h"
-#include "tm_stm32f4_fonts.h"
 
+#define SLAVE
+
+#ifdef SLAVE
+#define TM_SPI3_MASTERSLAVE SPI_Mode_Slave
+#define DATAVAL 3
+#endif
+
+#ifdef MASTER
+#define DATAVAL 5
+#endif
+
+#include "tm_stm32f4_gpio.h"
+#include "tm_stm32f4_spi.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -22,36 +22,38 @@ int main(void)
 {
 	//Initialize system
 	SystemInit();
-	
-	//Initialize ILI9341
-	TM_ILI9341_Init();
-	//Rotate LCD for 90 degrees
-	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_2);
-	//FIll lcd with color
-	TM_ILI9341_Fill(ILI9341_COLOR_MAGENTA);
-	//Draw white circle
-	TM_ILI9341_DrawCircle(60, 60, 40, ILI9341_COLOR_GREEN);
-	//Draw red filled circle
-	TM_ILI9341_DrawFilledCircle(60, 60, 35, ILI9341_COLOR_RED);
-	//Draw blue rectangle
-	TM_ILI9341_DrawRectangle(120, 20, 220, 100, ILI9341_COLOR_BLUE);
-	//Draw black filled rectangle
-	TM_ILI9341_DrawFilledRectangle(130, 30, 210, 90, ILI9341_COLOR_BLACK);
-	//Draw line with custom color 0x0005
-	TM_ILI9341_DrawLine(10, 120, 310, 120, 0x0005);
-	
-	//Put string with black foreground color and blue background with 11x18px font
-	TM_ILI9341_Puts(65, 130, "MOSQUITO", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
-	//Put string with black foreground color and blue background with 11x18px font
-	TM_ILI9341_Puts(60, 150, "FINDER", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
-	//Put string with black foreground color and red background with 11x18px font
-	TM_ILI9341_Puts(245, 225, "majerle.eu", &TM_Font_7x10, ILI9341_COLOR_BLACK, ILI9341_COLOR_ORANGE);
- 
-    //Initialize system
-    SystemInit();
+	TM_SPI_Init(SPI3, TM_SPI_PinsPack_1);
 
-	while (1) {
-	}
+#ifdef SLAVE
+	TM_GPIO_Init(GPIOB, GPIO_PIN_9, TM_GPIO_Mode_IN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+#endif
+
+#ifdef MASTER
+TM_GPIO_Init(GPIOB, GPIO_PIN_9, TM_GPIO_Mode_OUT, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+TM_GPIO_SetPinValue(GPIOB, GPIO_PIN_9, 1);
+#endif
+
+while (1) {
+
+#ifdef SLAVE
+   if(!TM_GPIO_GetInputPinValue(GPIOB, GPIO_PIN_9)){
+      uint8_t data = TM_SPI_Send(SPI3, DATAVAL);
+      printf("%d\n",data);
+    }
+
+#endif
+
+
+#ifdef MASTER
+   TM_GPIO_SetPinValue(GPIOB, GPIO_PIN_9, 0);
+   uint8_t data = TM_SPI_Send(SPI3, DATAVAL);
+   printf("%d\n",data);
+   TM_GPIO_SetPinValue(GPIOB, GPIO_PIN_9, 1);
+#endif
+
+
+
+}
 }
 
 
