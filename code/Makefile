@@ -26,7 +26,7 @@ endif
 #Debug
 CFLAGS  = -ggdb -O0 -Wall
 
-CFLAGS += -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -D__FPU_PRESENT=1 -DSTM32F40_41xxx -DUSE_STM32F4_DISCO -DSTM32F4XX
+CFLAGS += -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -D__FPU_PRESENT=1 -DSTM32F40_41xxx -DUSE_STM32F4_DISCO -DSTM32F4XX -DARM_MATH_CM4
 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=always
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
@@ -44,6 +44,8 @@ CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_spi
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_dma
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_spi_dma
 CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_fonts
+
+
 
 # Linker script
 LDSCRIPT = stm32_flash.ld
@@ -63,9 +65,16 @@ SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c
 SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.c
 SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c
 SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c
-
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_f32.c
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft_radix4_init_f32.c
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_f32.c
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_f32.c
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c
 OBJS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SRCS))))
-
+#OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4bf_math.lib
+#OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4b_math.lib
+#OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4lf_math.lib
+#OBJS += $(STM_COMMON)/Libraries/CMSIS/Lib/ARM/arm_cortexM4l_math.lib
 SEMIHOSTING_FLAGS = --specs=rdimon.specs -lc -lrdimon 
 
 ELF = $(PROJ_NAME).elf

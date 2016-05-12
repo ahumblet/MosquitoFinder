@@ -1,13 +1,26 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 #include "defines.h"
+#include "tm_stm32f4_gpio.h"
+#include "tm_stm32f4_spi.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 
 #define FFT
 
 #ifdef FFT
 #include "math.h"
-#define PI 3.14
-#define DATA_LEN 1024
+#define ARM_MATH_CM4
+#include "arm_math.h"
+#define TEST_LENGTH_SAMPLES 2048
+float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES]; 
+static float32_t testOutput[TEST_LENGTH_SAMPLES/2]; 
+uint32_t fftSize = 1024; 
+uint32_t ifftFlag = 0; 
+uint32_t doBitReverse = 1;
+uint32_t refIndex = 213, testIndex = 0;
+
 #endif
 
 #ifdef SLAVE
@@ -19,10 +32,7 @@
 #define DATAVAL 5
 #endif
 
-#include "tm_stm32f4_gpio.h"
-#include "tm_stm32f4_spi.h"
-#include <stdio.h>
-#include <stdlib.h>
+
 
 int main(void)
 {
@@ -42,12 +52,18 @@ int main(void)
 #endif
 
 #ifdef FFT
-  float data[DATA_LEN];
-  for(int i = 0; i < DATA_LEN; i++) {
-    data[i] = sin(2.0*PI*(float)i/(float)DATA_LEN);
+  for(int i = 0; i < TEST_LENGTH_SAMPLES/2; i++) {
+    testInput_f32_10khz[2*i] = sin(600*PI*(float)i/(float)TEST_LENGTH_SAMPLES);
+    testInput_f32_10khz[2*i+1] = 0;
   }
 
-  
+  arm_cfft_radix4_instance_f32 S; 
+  float32_t maxValue; 
+  arm_cfft_radix4_init_f32(&S, fftSize, ifftFlag, doBitReverse);
+  arm_cfft_radix4_f32(&S, testInput_f32_10khz);
+  arm_cmplx_mag_f32(testInput_f32_10khz, testOutput, fftSize);  
+  arm_max_f32(testOutput, fftSize, &maxValue, &testIndex); 
+  printf("The Max Value is: %f, at %d\n", maxValue, testIndex);
 #endif
 
 
