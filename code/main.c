@@ -166,13 +166,14 @@ void DMA2_Stream0_IRQHandler(void) // Called at 1 KHz for 200 KHz sample rate, L
 		/* Turn LED3 off: Half Transfer */
 		STM_EVAL_LEDOff(LED3);
 		// Add code here to process first half of buffer (ping)
-		//TESTING
-		printf("FIRST HALF: \n");
+		int min = 4096;
+		int max = 0;
 		for (int i = 0; i < BUFFERSIZE/2; i++) {
 			uint16_t val = ADCDualConvertedValues[i];
-			printf("%d ", val);
+			if (val < min) min = val;
+			if (val > max) max = val;
 		}
-		printf("\n");
+		printf("1st Half:\t min= %d\t max = %d\n", min, max);
 	}
  
 	/* Test on DMA Stream Transfer Complete interrupt */
@@ -183,12 +184,14 @@ void DMA2_Stream0_IRQHandler(void) // Called at 1 KHz for 200 KHz sample rate, L
 		/* Turn LED3 on: End of Transfer */
 		STM_EVAL_LEDOn(LED3);
 		// Add code here to process second half of buffer (pong)
-		printf("SECOND HALF: \n");
+		int min = 4096;
+		int max = 0;
 		for (int i = BUFFERSIZE/2; i < BUFFERSIZE; i++) {
 			uint16_t val = ADCDualConvertedValues[i];
-			printf("%d ", val);
+			if (val < min) min = val;
+			if (val > max) max = val;
 		}
-		printf("\n");
+		printf("2nd Half:\t min= %d\t max = %d\n", min, max);
 	}
 }
 
