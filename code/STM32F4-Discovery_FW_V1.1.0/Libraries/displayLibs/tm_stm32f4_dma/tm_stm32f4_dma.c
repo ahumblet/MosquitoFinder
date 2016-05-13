@@ -268,6 +268,7 @@ void DMA1_Stream7_IRQHandler(void) {
 	TM_DMA_INT_ProcessInterrupt(DMA1_Stream7);
 }
 #endif
+
 #ifndef DMA2_STREAM0_DISABLE_IRQHANDLER
 void DMA2_Stream0_IRQHandler(void) {
 	/* Call user function */
