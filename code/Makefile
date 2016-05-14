@@ -47,6 +47,7 @@ CFLAGS += -I$(STM_COMMON)/Libraries/displayLibs/tm_stm32f4_fonts
 #AH, adding for external mic
 CFLAGS += -I$(STM_COMMON)/Libraries/STM42F4xx_StdPeriph_Driver/inc/stm32f4xx_adc.h
 #I should be able to remove the line above, it's redundant with the inc folder above
+CFLAGS += -I$(STM_COMMON)/Libraries/speaker
 
 # Linker script
 LDSCRIPT = stm32_flash.ld
@@ -71,6 +72,9 @@ SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c
 SRCS += $(STM_COMMON)/Utilities/STM32F4-Discovery/stm32f4_discovery.c
 SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.c
 SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
+SRCS += $(STM_COMMON)/Libraries/speaker/codec.c
+SRCS += $(STM_COMMON)/Libraries/speaker/speaker.c
+SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.c
 
 OBJS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SRCS))))
 

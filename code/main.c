@@ -15,6 +15,40 @@
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 
+//for speaker
+#include "speaker.h"
+#include "codec.h"
+//#include "arm_math.h"
+#include <math.h>
+
+
+static void init_systick();
+static void delay_ms(uint32_t n);
+static volatile uint32_t msTicks; // counts 1 ms timeTicks
+static volatile uint32_t mmsTicks = 0; // counts 0.1 ms timeTicks
+
+// SysTick Handler (Interrupt Service Routine for the System Tick interrupt)
+void SysTick_Handler(void)
+{
+	msTicks++;
+}
+
+// initialize the system tick
+void init_systick(void)
+{
+	SystemCoreClockUpdate();                      /* Get Core Clock Frequency   */
+	if (SysTick_Config(SystemCoreClock / 1000)) { /* SysTick 1 msec interrupts  */
+		while (1);                                  /* Capture error              */
+	}
+}
+
+// pause for a specified number (n) of milliseconds
+void delay_ms(uint32_t n)
+{
+	uint32_t msTicks2 = msTicks + n;
+	while(msTicks < msTicks2) ;
+}
+
 volatile uint16_t ADCBuffer[] = {5, 5, 5, 5};
 
 void configure(){
@@ -121,15 +155,41 @@ void TIM2_IRQHandler() {
 	printf("%d\t%d\t%d\t%d\n", ADCBuffer[0], ADCBuffer[1], ADCBuffer[2], ADCBuffer[3]);
 }
 
-
 int main(void){
+	SystemInit();
+	init_systick();
 	
 	configure();
-
-	TIM_Cmd(TIM2, ENABLE);
+	init_speaker();
 	
+	TIM_Cmd(TIM2, ENABLE);
 	ADC_SoftwareStartConv(ADC1);//Start the conversion
 	
-	while(1){
+	printf("HSE = %d\n", HSE_VALUE);
+	
+	int16_t audio_sample;
+	
+	// the code below outputs a sine wave to the speaker
+	// the frequency and loudness are changed based on pitch and roll
+	float audio_freq = 1500;
+	float loudness = 2500;
+	float last_freq_changed_time = -1; // the time at which the frequency was changed last
+	while (1)
+	{
+		int t = msTicks;
+		//printf("msTicks: %f\n", t);
+		//float t = mmsTicks / 10000.0; // calculate time
+		//if (t > (last_freq_changed_time + 0.2)) // every 0.2 seconds
+		//{
+			audio_freq = 1500;
+			loudness = 2500;
+			last_freq_changed_time = t;
+			//printf("time = %d ms\n", t);
+		//}
+		//audio_sample = (int16_t) (loudness*arm_sin_f32(audio_freq*t));
+		audio_sample = (int16_t) (loudness*sin(500*t));
+		//printf("%d\n", audio_sample);
+		send_to_speaker(audio_sample);	// send one audio sample to the audio output*/
 	}
+
 }
