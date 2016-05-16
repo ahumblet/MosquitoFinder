@@ -32,13 +32,18 @@ void configureADC() {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	
 	//GPIO
-	GPIO_InitTypeDef GPIO_InitStructure;
+	TM_GPIO_Init(MIC_PORT, MIC1_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+	TM_GPIO_Init(MIC_PORT, MIC2_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+	TM_GPIO_Init(MIC_PORT, MIC3_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+	TM_GPIO_Init(MIC_PORT, MIC4_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
+
+	/*GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-	//GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_Init(GPIOC, &GPIO_InitStructure);*/
 	
 	//TIM
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -122,6 +127,9 @@ void configureADC() {
 	ADC_DMACmd(ADC1, ENABLE);
  
 	ADC_Cmd(ADC1, ENABLE);
+	
+	//start Tim (used to be in main)
+	TIM_Cmd(TIM2, ENABLE);
 }
 
 void TIM2_IRQHandler() {
@@ -134,15 +142,10 @@ int main(void)
 {
 	//Initialize system
 	SystemInit();
-	
 	//init adc dma system for mics
 	configureADC();
-	
 	//Initialize ILI9341
 	TM_ILI9341_Init();
-	
-	//start Tim
-	TIM_Cmd(TIM2, ENABLE);
 	
 	//Rotate LCD for 90 degrees
 	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_2);
@@ -158,13 +161,14 @@ int main(void)
 	TM_ILI9341_DrawFilledRectangle(130, 30, 210, 90, ILI9341_COLOR_BLACK);
 	//Draw line with custom color 0x0005
 	TM_ILI9341_DrawLine(10, 120, 310, 120, 0x0005);
-	
+
+	//Put string with black foreground color and red background with 11x18px font
+	TM_ILI9341_Puts(1, 1, "Adrienne Humblet \n Alex Thomson", &TM_Font_7x10, ILI9341_COLOR_BLACK, ILI9341_COLOR_ORANGE);
 	//Put string with black foreground color and blue background with 11x18px font
 	TM_ILI9341_Puts(65, 130, "MOSQUITO", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
 	//Put string with black foreground color and blue background with 11x18px font
 	TM_ILI9341_Puts(60, 150, "FINDER", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
-	//Put string with black foreground color and red background with 11x18px font
-	TM_ILI9341_Puts(245, 225, "majerle.eu", &TM_Font_7x10, ILI9341_COLOR_BLACK, ILI9341_COLOR_ORANGE);
+
 
 	while (1) {
 	}
