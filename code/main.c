@@ -17,12 +17,18 @@
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 
-//for speaker
-//#include "speaker.h"
-//#include "codec.h"
-//#include <math.h>
 
+#define BUFFERSIZE 5
 volatile uint16_t ADCBuffer[] = {5, 5, 5, 5};
+uint16_t mic0Buffer[BUFFERSIZE];
+uint16_t mic1Buffer[BUFFERSIZE];
+uint16_t mic2Buffer[BUFFERSIZE];
+uint16_t mic3Buffer[BUFFERSIZE];
+
+#define NUM_MICS 4
+int micCounter = 0;
+int amplitudes[NUM_MICS];
+int loudestIndex = 0;
 
 void configureADC() {
 	
@@ -36,14 +42,6 @@ void configureADC() {
 	TM_GPIO_Init(MIC_PORT, MIC2_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
 	TM_GPIO_Init(MIC_PORT, MIC3_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
 	TM_GPIO_Init(MIC_PORT, MIC4_PIN, TM_GPIO_Mode_AN, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_Medium);
-
-	/*GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_StructInit(&GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
-	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);*/
 	
 	//TIM
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -133,15 +131,6 @@ void configureADC() {
 	TIM_Cmd(TIM2, ENABLE);
 }
 
-#define BUFFERSIZE 5
-#define NUM_MICS 4
-int micCounter = 0;
-uint16_t mic0Buffer[BUFFERSIZE];
-uint16_t mic1Buffer[BUFFERSIZE];
-uint16_t mic2Buffer[BUFFERSIZE];
-uint16_t mic3Buffer[BUFFERSIZE];
-
-
 void TIM2_IRQHandler() {
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	
@@ -150,7 +139,6 @@ void TIM2_IRQHandler() {
 	mic1Buffer[micCounter] = ADCBuffer[1];
 	mic2Buffer[micCounter] = ADCBuffer[2];
 	mic3Buffer[micCounter] = ADCBuffer[3];
-	int amplitudes[NUM_MICS];
 	
 	int min0 = 0;
 	int max0 = 0;
@@ -181,11 +169,21 @@ void TIM2_IRQHandler() {
 			maxAmp = amplitudes[i];
 		}
 	}
+	loudestIndex = maxAmpIndex;
 	printf("LOUDEST is mic %d\n", maxAmpIndex);
 }
 
-void displayLoudest(int loudest) {
-	TM_ILI9341_Puts(10, 120, "Loudest is: 1", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_WHITE);
+void displayAmplitudes() {
+	int colWidth = ILI9341_HEIGHT / NUM_MICS;
+	int x = 0;
+	int y = 240;
+	for (int i = 0; i < NUM_MICS; i++) {
+		int amp = amplitudes[i];
+		int topY = 240 - ((amp/(float)4095) * 240);
+		TM_ILI9341_DrawFilledRectangle(x, y, x+colWidth, topY, ILI9341_COLOR_RED);
+		TM_ILI9341_DrawFilledRectangle(x, topY, x+colWidth, 0, ILI9341_COLOR_WHITE);
+		x += colWidth;
+	}
 }
 
 void getMinMax(uint16_t *buffer, int *bmin, int *bmax) {
@@ -214,7 +212,6 @@ void displayWelcomeScreen() {
 	TM_ILI9341_DrawCircle(260, 60, 40, ILI9341_COLOR_GREEN);
 	TM_ILI9341_DrawFilledCircle(260, 60, 35, ILI9341_COLOR_RED);
 	
-	
 	//Draw line with custom color 0x0005
 	TM_ILI9341_DrawLine(10, 120, 310, 120, 0x0005);
 	
@@ -241,7 +238,9 @@ int main(void)
 
 	displayWelcomeScreen();
 	
+	int prevLoudestIndex;
 	while (1) {
+		displayAmplitudes();
 	}
 }
 
