@@ -184,6 +184,10 @@ void TIM2_IRQHandler() {
 	printf("LOUDEST is mic %d\n", maxAmpIndex);
 }
 
+void displayLoudest(int loudest) {
+	TM_ILI9341_Puts(10, 120, "Loudest is: 1", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_WHITE);
+}
+
 void getMinMax(uint16_t *buffer, int *bmin, int *bmax) {
 	int max = 0;
 	int min = 4095;
@@ -196,6 +200,33 @@ void getMinMax(uint16_t *buffer, int *bmin, int *bmax) {
 	*bmax = max;
 }
 
+void displayWelcomeScreen() {
+	//circles
+	TM_ILI9341_DrawCircle(60, 60, 40, ILI9341_COLOR_GREEN);
+	TM_ILI9341_DrawFilledCircle(60, 60, 35, ILI9341_COLOR_RED);
+	
+	//Draw blue rectangle
+	TM_ILI9341_DrawRectangle(120, 20, 200, 100, ILI9341_COLOR_BLUE);
+	//Draw black filled rectangle
+	TM_ILI9341_DrawFilledRectangle(130, 30, 190, 90, ILI9341_COLOR_BLACK);
+	
+	//circles
+	TM_ILI9341_DrawCircle(260, 60, 40, ILI9341_COLOR_GREEN);
+	TM_ILI9341_DrawFilledCircle(260, 60, 35, ILI9341_COLOR_RED);
+	
+	
+	//Draw line with custom color 0x0005
+	TM_ILI9341_DrawLine(10, 120, 310, 120, 0x0005);
+	
+	//Put string with black foreground color and blue background with 11x18px font
+	TM_ILI9341_Puts(20, 130, "MOSQUITO DETECTOR", &TM_Font_16x26, ILI9341_COLOR_BLACK, ILI9341_COLOR_WHITE);
+	
+	//Draw line with custom color 0x0005
+	TM_ILI9341_DrawLine(10, 165, 310, 165, 0x0005);
+	
+	TM_ILI9341_Puts(30, 180, "Adrienne Humblet\nAlex Thomson", &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+}
+
 int main(void)
 {
 	//Initialize system
@@ -206,28 +237,10 @@ int main(void)
 	TM_ILI9341_Init();
 	
 	//Rotate LCD for 90 degrees
-	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_2);
-	//FIll lcd with color
-	TM_ILI9341_Fill(ILI9341_COLOR_MAGENTA);
-	//Draw white circle
-	TM_ILI9341_DrawCircle(60, 60, 40, ILI9341_COLOR_GREEN);
-	//Draw red filled circle
-	TM_ILI9341_DrawFilledCircle(60, 60, 35, ILI9341_COLOR_RED);
-	//Draw blue rectangle
-	TM_ILI9341_DrawRectangle(120, 20, 220, 100, ILI9341_COLOR_BLUE);
-	//Draw black filled rectangle
-	TM_ILI9341_DrawFilledRectangle(130, 30, 210, 90, ILI9341_COLOR_BLACK);
-	//Draw line with custom color 0x0005
-	TM_ILI9341_DrawLine(10, 120, 310, 120, 0x0005);
+	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_1);
 
-	//Put string with black foreground color and red background with 11x18px font
-	TM_ILI9341_Puts(1, 1, "Adrienne Humblet \n Alex Thomson", &TM_Font_7x10, ILI9341_COLOR_BLACK, ILI9341_COLOR_ORANGE);
-	//Put string with black foreground color and blue background with 11x18px font
-	TM_ILI9341_Puts(65, 130, "MOSQUITO", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
-	//Put string with black foreground color and blue background with 11x18px font
-	TM_ILI9341_Puts(60, 150, "FINDER", &TM_Font_11x18, ILI9341_COLOR_BLACK, ILI9341_COLOR_BLUE2);
-
-
+	displayWelcomeScreen();
+	
 	while (1) {
 	}
 }
