@@ -51,7 +51,8 @@ void configureADC() {
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_Period = 1999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 17999;
+	TIM_TimeBaseStructure.TIM_Prescaler = 5000;
+	//	TIM_TimeBaseStructure.TIM_Prescaler = 17999;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 	TIM_SelectOutputTrigger(TIM2,TIM_TRGOSource_Update);
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
@@ -68,7 +69,7 @@ void configureADC() {
 	DMA_InitTypeDef DMA_InitStructure;
 	DMA_StructInit(&DMA_InitStructure);
 	DMA_InitStructure.DMA_Channel = DMA_Channel_0; /* See Tab 20 */
-	DMA_InitStructure.DMA_BufferSize = 4; /* 5 * memsize */
+	DMA_InitStructure.DMA_BufferSize = 4;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory; /* direction */
 	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable; /* no FIFO */
 	DMA_InitStructure.DMA_FIFOThreshold = 0;
@@ -116,10 +117,10 @@ void configureADC() {
 	ADC_TempSensorVrefintCmd(ENABLE);
  
 	/* Configure channels */
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_480Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_480Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_144Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_144Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_144Cycles);
  
 	/* Enable DMA request after last transfer (Single-ADC mode) */
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
@@ -132,10 +133,67 @@ void configureADC() {
 	TIM_Cmd(TIM2, ENABLE);
 }
 
+#define BUFFERSIZE 5
+#define NUM_MICS 4
+int micCounter = 0;
+uint16_t mic0Buffer[BUFFERSIZE];
+uint16_t mic1Buffer[BUFFERSIZE];
+uint16_t mic2Buffer[BUFFERSIZE];
+uint16_t mic3Buffer[BUFFERSIZE];
+
+
 void TIM2_IRQHandler() {
-	printf("hello from tim2_irqhandler\n");
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	printf("%d\t%d\t%d\t%d\n", ADCBuffer[0], ADCBuffer[1], ADCBuffer[2], ADCBuffer[3]);
+	
+	micCounter = (micCounter + 1) % BUFFERSIZE;
+	mic0Buffer[micCounter] = ADCBuffer[0];
+	mic1Buffer[micCounter] = ADCBuffer[1];
+	mic2Buffer[micCounter] = ADCBuffer[2];
+	mic3Buffer[micCounter] = ADCBuffer[3];
+	int amplitudes[NUM_MICS];
+	
+	int min0 = 0;
+	int max0 = 0;
+	getMinMax(mic0Buffer, &min0, &max0);
+	amplitudes[0] = max0 - min0;
+
+	int min1 = 0;
+	int max1 = 0;
+	getMinMax(mic1Buffer, &min1, &max1);
+	amplitudes[1] = max1 - min1;
+
+	int min2 = 0;
+	int max2 = 0;
+	getMinMax(mic2Buffer, &min2, &max2);
+	amplitudes[2] = max2 - min2;
+	
+	int min3 = 0;
+	int max3 = 0;
+	getMinMax(mic3Buffer, &min3, &max3);
+	amplitudes[3] = max3 - min3;
+	
+	int maxAmpIndex = 0;
+	int maxAmp = amplitudes[0];
+	for (int i = 0; i < NUM_MICS; i++) {
+		//printf("%d, ", amplitudes[i]);
+		if (amplitudes[i] > maxAmp) {
+			maxAmpIndex = i;
+			maxAmp = amplitudes[i];
+		}
+	}
+	printf("LOUDEST is mic %d\n", maxAmpIndex);
+}
+
+void getMinMax(uint16_t *buffer, int *bmin, int *bmax) {
+	int max = 0;
+	int min = 4095;
+	for (int i = 0; i < BUFFERSIZE; i++) {
+		int val = buffer[i];
+		if (val < min) min = val;
+		if (val > max) max = val;
+	}
+	*bmin = min;
+	*bmax = max;
 }
 
 int main(void)
