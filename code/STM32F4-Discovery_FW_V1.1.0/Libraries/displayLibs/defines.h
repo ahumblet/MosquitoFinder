@@ -51,4 +51,11 @@
 //#define ILI9341_RST_PORT            GPIOD
 //#define ILI9341_RST_PIN                GPIO_PIN_12
 
+//mic define
+#define MIC_PORT	GPIOC
+#define MIC1_PIN	GPIO_PIN_0
+#define MIC2_PIN	GPIO_PIN_1
+#define MIC3_PIN	GPIO_PIN_2
+#define MIC4_PIN	GPIO_PIN_3
+
 #endif
