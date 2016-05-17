@@ -288,7 +288,7 @@ void obtainSample() {
   }
 
 }
-
+/*
 float32_t sigmoid(float32_t input) {
   float32_t eval = exp(-input);
   return 1.0/(1.0+eval);
@@ -315,14 +315,29 @@ float32_t linearNode(float32_t* data, float32_t* w, float32_t T, int n_nodes){
   sum += T;
   return sum;
 }
-
+*/
 float32_t calc_distance(){
-
+  float32_t dest[BUFFERSIZE * 4];
+  arm_mult_f32(outputBuffer, D_C, &dest, BUFFERSIZE * 4);
+  float32_t sum = 0;
+  for(int i = 0; i < BUFFERSIZE * 4; i++) {
+    sum += dest[i];
+  }
+  sum += D_T;
+  return sum;
 }
-
 float32_t calc_ang(){
-
+  float32_t dest[BUFFERSIZE * 4];
+  arm_mult_f32(outputBuffer, A_C, &dest, BUFFERSIZE * 4);
+  float32_t sum = 0;
+  for(int i = 0; i < BUFFERSIZE * 4; i++) {
+    sum += dest[i];
+  }
+  sum += A_T;
+  return sum;
 }
+
+
 /*
 float32_t calc_distance(){
   float32_t hLayer[3];
