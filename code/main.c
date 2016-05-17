@@ -258,8 +258,10 @@ void displayWelcomeScreen() {
 }
 
 void sendSerialData(float32_t* data, uint32_t length) {
-
-
+  write_serial_usb_bytes(&length, 4);
+  for(int i = 0; i < length; i++) {
+    write_serial_usb_bytes(&(data[i]), 4);
+  }
 }
 
 void obtainSample() {
@@ -283,7 +285,8 @@ void obtainSample() {
 	  outputBuffer[k] = magOutput[k - (i * BUFFERSIZE)];
 	}
       }
-
+      sendSerialData(outputBuffer,BUFFERSIZE * 4);
+      break;
     }
 
   }
