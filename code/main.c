@@ -1,6 +1,6 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
-
+#include "math.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,14 +31,11 @@ uint16_t mic0Buffer[BUFFERSIZE];
 uint16_t mic1Buffer[BUFFERSIZE];
 uint16_t mic2Buffer[BUFFERSIZE];
 uint16_t mic3Buffer[BUFFERSIZE];
+float32_t outputBuffer[BUFFERSIZE * 4];
 uint16_t * micBuffers[4];
 uint32_t ready = 0;
 
-//amplitude of all 4 mics
-int amplitudes[NUM_MICS];
-int loudestIndex = 0;
-
-#define SERIAL
+//#define SERIAL
 #define FFT
 
 #ifdef FFT
@@ -83,6 +80,14 @@ void wait_for_byte_from_serial_usb()
       return;
   }
 }
+
+void sendSerialData(float32_t* data, uint32_t length) {
+  write_serial_usb_bytes(&length, 4);
+  for(int i = 0; i < length; i++) {
+    write_serial_usb_bytes(&(data[i]), 4);
+  }
+}
+
 #endif
 
 static void init_systick();
@@ -110,12 +115,6 @@ void delay_ms(uint32_t n)
   uint32_t msTicks2 = msTicks + n;
   while(msTicks < msTicks2) ;
 }
-
-
-
-
-
-
 
 void configureADC() {
   micBuffers[0] = mic0Buffer;
@@ -259,15 +258,8 @@ void displayWelcomeScreen() {
 	TM_ILI9341_Puts(30, 180, "Adrienne Humblet\nAlex Thomson", &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 }
 
-void sendSerialData(float32_t* data, uint32_t length) {
-  write_serial_usb_bytes(&length, 4);
-  for(int i = 0; i < length; i++) {
-    write_serial_usb_bytes(&(data[i]), 4);
-  }
-}
 
 void obtainSample() {
-  float32_t outputBuffer[BUFFERSIZE * 4];
   arm_cfft_radix4_instance_f32 S;
   TIM_Cmd(TIM2, ENABLE);
   while(1){
@@ -287,12 +279,35 @@ void obtainSample() {
 	  outputBuffer[k] = magOutput[k - (i * BUFFERSIZE)];
 	}
       }
+#ifdef SERIAL
       sendSerialData(outputBuffer,BUFFERSIZE * 4);
+#endif
       break;
     }
 
   }
 
+}
+
+float32_t sigmoid(float32_t input) {
+  float32_t eval = exp(-input);
+  return 1.0/(1.0+eval);
+}
+
+float32_t calcNode(float32_t* data, float32_t* w, float32_t T){
+  float32_t dest[BUFFERSIZE * 4];
+  arm_mult_f32(data,w,&dest,BUFFERSIZE*4);
+  float32_t sum = 0;
+  for(int i = 0; i < BUFFERSIZE * 4;i++) {
+    sum += dest[i];
+  }
+  sum+=T;
+  return sigmoid(sum);
+}
+
+float32_t calc_distance(){
+  float32_t hLayer[3];
+  hLayer[0] = calcNode(D_N_1
 }
 
 int main(void)
@@ -310,14 +325,23 @@ int main(void)
 
 	//displayWelcomeScreen();
 	//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
-	for(int i = 0; i < 64; i++){
+	/*for(int i = 0; i < 64; i++){
 	  printf("%f\n",D_N_2[i]);
-	  }
+	  }*/
 #ifdef SERIAL
 	init_serial_port_usb();
 	delay_ms(1000);
 #endif
-	while(1){
+
+	while(1){ //The primary While(1) loop
+	  obtainSample();
+	  
+	  delay_ms(500);
+
+
+
+
+
 #ifdef SERIAL
 	  while (1)
 	    {
