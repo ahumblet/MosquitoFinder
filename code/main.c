@@ -31,6 +31,7 @@ uint16_t mic0Buffer[BUFFERSIZE];
 uint16_t mic1Buffer[BUFFERSIZE];
 uint16_t mic2Buffer[BUFFERSIZE];
 uint16_t mic3Buffer[BUFFERSIZE];
+uint16_t * micBuffers[4];
 uint32_t ready = 0;
 
 //amplitude of all 4 mics
@@ -39,6 +40,18 @@ int loudestIndex = 0;
 
 #define SERIAL
 #define FFT
+
+#ifdef FFT
+#include "math.h"
+#define ARM_MATH_CM4
+#include "arm_math.h"
+float32_t FFTInput[BUFFERSIZE * 2]; 
+static float32_t magOutput[BUFFERSIZE]; 
+uint32_t fftSize = BUFFERSIZE; 
+uint32_t ifftFlag = 0; 
+uint32_t doBitReverse = 1;
+uint32_t refIndex = 213, testIndex = 0;
+#endif
 
 #ifdef SERIAL
 #include "serial_port_usb/serial_port_usb.h"
@@ -100,22 +113,13 @@ void delay_ms(uint32_t n)
 
 
 
-#ifdef FFT
-#include "math.h"
-#define ARM_MATH_CM4
-#include "arm_math.h"
-#define TEST_LENGTH_SAMPLES 2048
-float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES]; 
-static float32_t testOutput[TEST_LENGTH_SAMPLES/2]; 
-uint32_t fftSize = 1024; 
-uint32_t ifftFlag = 0; 
-uint32_t doBitReverse = 1;
-uint32_t refIndex = 213, testIndex = 0;
 
-#endif
 
 void configureADC() {
-	
+  micBuffers[0] = mic0Buffer;
+  micBuffers[1] = mic1Buffer;
+  micBuffers[2] = mic2Buffer;
+  micBuffers[3] = mic3Buffer;
 	//RCC
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2, ENABLE);
@@ -217,7 +221,6 @@ void configureADC() {
 
 void TIM2_IRQHandler() {
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	//printf("IRQ handler\n");
 	mic0Buffer[bufferPos] = ADCBuffer[0];
 	mic1Buffer[bufferPos] = ADCBuffer[1];
 	mic2Buffer[bufferPos] = ADCBuffer[2];
@@ -227,55 +230,6 @@ void TIM2_IRQHandler() {
 	  ready = 1;
 }
 
-void fillAmplitudeArray() {
-	amplitudes[0] = getAmplitude(mic0Buffer);
-	amplitudes[1] = getAmplitude(mic1Buffer);
-	amplitudes[2] = getAmplitude(mic2Buffer);
-	amplitudes[3] = getAmplitude(mic3Buffer);
-	
-	int maxAmpIndex = 0;
-	int maxAmp = amplitudes[0];
-	printf("amplitudes: ");
-	for (int i = 0; i < NUM_MICS; i++) {
-		printf("%d, ", amplitudes[i]);
-		if (amplitudes[i] > maxAmp) {
-			maxAmpIndex = i;
-			maxAmp = amplitudes[i];
-		}
-	}
-	loudestIndex = maxAmpIndex;
-	printf("LOUDEST is mic %d\n", maxAmpIndex);
-}
-
-int getAmplitude(uint16_t *buffer) {
-	int max = 0;
-	int min = 4095;
-	for (int i = 0; i < BUFFERSIZE; i++) {
-		int val = buffer[i];
-		if (val < min) min = val;
-		if (val > max) max = val;
-	}
-	return max - min;
-}
-
-void displayLoudest(int loudestIndex) {
-	char text[20];
-	sprintf(&text, "mosquito near mic %d", loudestIndex);
-	TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
-}
-
-void displayAmplitudes() {
-	int colWidth = ILI9341_HEIGHT / NUM_MICS;
-	int x = 0;
-	int y = 240;
-	for (int i = 0; i < NUM_MICS; i++) {
-		int amp = amplitudes[i];
-		int topY = 240 - ((amp/(float)4095) * 240);
-		TM_ILI9341_DrawFilledRectangle(x, y, x+colWidth, topY, ILI9341_COLOR_RED);
-		TM_ILI9341_DrawFilledRectangle(x, topY, x+colWidth, 0, ILI9341_COLOR_WHITE);
-		x += colWidth;
-	}
-}
 
 void displayWelcomeScreen() {
 	//circles
@@ -303,6 +257,34 @@ void displayWelcomeScreen() {
 	TM_ILI9341_Puts(30, 180, "Adrienne Humblet\nAlex Thomson", &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 }
 
+void obtainSample() {
+  float32_t outputBuffer[BUFFERSIZE * 4];
+  arm_cfft_radix4_instance_f32 S;
+  TIM_Cmd(TIM2, ENABLE);
+  while(1){
+    if(ready){
+      TIM_Cmd(TIM2, DISABLE);
+      ready = 0;
+      for( int i = 0; i < 4; i++) {
+	uint16_t * buffer = micBuffers[i];
+	for(int j = 0; j < BUFFERSIZE; j++) {
+	  FFTInput[2*j] = buffer[j];
+	  FFTInput[2*j+1] = 0; //Complex part is zero, we have real data
+	}
+	arm_cfft_radix4_init_f32(&S, fftSize, ifftFlag, doBitReverse);
+	arm_cfft_radix4_f32(&S, FFTInput);
+	arm_cmplx_mag_f32(FFTInput, magOutput, fftSize);  
+	for(int k = i * BUFFERSIZE; k < (i+1) * BUFFERSIZE; k++){
+	  outputBuffer[k] = magOutput[k - (i * BUFFERSIZE)];
+	}
+      }
+
+    }
+
+  }
+
+}
+
 int main(void)
 {
 	//Initialize system
@@ -320,27 +302,18 @@ int main(void)
 	//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 
 #ifdef FFT
-	for(int i = 0; i < TEST_LENGTH_SAMPLES/2; i++) {
-	  testInput_f32_10khz[2*i] = sin(600*PI*(float)i/(float)TEST_LENGTH_SAMPLES);
-	  testInput_f32_10khz[2*i+1] = 0;
-	}
-
-	arm_cfft_radix4_instance_f32 S; 
-	float32_t maxValue; 
-	arm_cfft_radix4_init_f32(&S, fftSize, ifftFlag, doBitReverse);
-	arm_cfft_radix4_f32(&S, testInput_f32_10khz);
-	arm_cmplx_mag_f32(testInput_f32_10khz, testOutput, fftSize);  
-	arm_max_f32(testOutput, fftSize, &maxValue, &testIndex); 
-	printf("The Max Value is: %f, at %d\n", maxValue, testIndex);
+	//float32_t maxValue; 	
+	// arm_cfft_radix4_instance_f32 S; 	
+	// arm_cfft_radix4_init_f32(&S, fftSize, ifftFlag, doBitReverse);
+	// arm_cfft_radix4_f32(&S, testInput_f32_10khz);
+	// arm_cmplx_mag_f32(testInput_f32_10khz, testOutput, fftSize);  
+	// arm_max_f32(testOutput, fftSize, &maxValue, &testIndex); 
+	// printf("The Max Value is: %f, at %d\n", maxValue, testIndex);
 #endif
 
 #ifdef SERIAL
-	//init_systick();
 	init_serial_port_usb();
-	char s[128];
-	delay_ms(3000);
-	int n_input = 0;
-
+	delay_ms(1000);
 #endif
 #ifndef SERIAL
 	TIM_Cmd(TIM2, ENABLE);
@@ -394,19 +367,6 @@ int main(void)
 
 
 	}
-	  /*	
-	int prevLoudestIndex;
-	while (1) {
-		if (loudestIndex != prevLoudestIndex) {
-			displayLoudest(loudestIndex);
-			prevLoudestIndex = loudestIndex;
-		}
-		if (bufferPos == (BUFFERSIZE - 1)) {
-			fillAmplitudeArray();
-		}
-	}
-	*/
-
-	}
+}
 
 
