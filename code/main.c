@@ -20,10 +20,11 @@
 
 //buffer for DMA
 #define NUM_MICS 4
-volatile uint16_t ADCBuffer[NUM_MICS];
+#define DMA_BUFFERSIZE 16
+volatile uint16_t ADCBuffer[DMA_BUFFERSIZE];
 
 //Buffers of samples, one for each mic
-#define BUFFERSIZE 10
+#define BUFFERSIZE 4
 int bufferPos = 0;
 uint16_t mic0Buffer[BUFFERSIZE];
 uint16_t mic1Buffer[BUFFERSIZE];
@@ -35,7 +36,6 @@ int amplitudes[NUM_MICS];
 int loudestIndex = 0;
 
 void configureADC() {
-	
 	//RCC
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2, ENABLE);
@@ -70,24 +70,24 @@ void configureADC() {
 	//DMA
 	DMA_InitTypeDef DMA_InitStructure;
 	DMA_StructInit(&DMA_InitStructure);
-	DMA_InitStructure.DMA_Channel = DMA_Channel_0; /* See Tab 20 */
-	DMA_InitStructure.DMA_BufferSize = 4;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory; /* direction */
-	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable; /* no FIFO */
+	DMA_InitStructure.DMA_Channel = DMA_Channel_0;
+	DMA_InitStructure.DMA_BufferSize = DMA_BUFFERSIZE;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
 	DMA_InitStructure.DMA_FIFOThreshold = 0;
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; /* circular buffer */
 	DMA_InitStructure.DMA_Priority = DMA_Priority_High; /* high priority */
 	/* config of memory */
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)ADCBuffer; /* target addr */
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord; /* 16 bit */
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)ADCBuffer;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	//AH, i changed these to stream4 bc of conflict with TM
-	DMA_Init(DMA2_Stream4, &DMA_InitStructure); /* See Table 20 for mapping */
+	//AH, i changed these to stream4 bc of conflict with TM display library
+	DMA_Init(DMA2_Stream4, &DMA_InitStructure);
 	DMA_Cmd(DMA2_Stream4, ENABLE);
 	
 	/* reset configuration if needed, could be used for previous init */
@@ -103,7 +103,7 @@ void configureADC() {
 	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
 	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_TRGO;
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_NbrOfConversion = 4; /* 5 channels in total */
+	ADC_InitStructure.ADC_NbrOfConversion = DMA_BUFFERSIZE;
 	ADC_Init(ADC1, &ADC_InitStructure);
 	
 	//ADC Common
@@ -135,17 +135,23 @@ void configureADC() {
 	TIM_Cmd(TIM2, ENABLE);
 }
 
+
+/* reads 16 ADC samples from the DMA. they are interleaved so we separate them into 4 buffers, one for each mic. */
 void TIM2_IRQHandler() {
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	
-	printf("IRQ handler\n");
-	mic0Buffer[bufferPos] = ADCBuffer[0];
-	mic1Buffer[bufferPos] = ADCBuffer[1];
-	mic2Buffer[bufferPos] = ADCBuffer[2];
-	mic3Buffer[bufferPos] = ADCBuffer[3];
+	for (int i = 0; i < DMA_BUFFERSIZE; i++) {
+		int val = ADCBuffer[i];
+		int index = (i % NUM_MICS);
+		if (index == 0) mic0Buffer[bufferPos] = val;
+		if (index == 1) mic1Buffer[bufferPos] = val;
+		if (index == 2) mic2Buffer[bufferPos] = val;
+		if (index == 3) mic3Buffer[bufferPos] = val;
+	}
 	bufferPos = (bufferPos + 1) % BUFFERSIZE;
 }
 
+/* For each mic's buffer, calculate the amplitude and fill the amplitude array */
 void fillAmplitudeArray() {
 	amplitudes[0] = getAmplitude(mic0Buffer);
 	amplitudes[1] = getAmplitude(mic1Buffer);
@@ -154,7 +160,7 @@ void fillAmplitudeArray() {
 	
 	int maxAmpIndex = 0;
 	int maxAmp = amplitudes[0];
-	printf("amplitudes: ");
+	printf("amplitudes:\t");
 	for (int i = 0; i < NUM_MICS; i++) {
 		printf("%d, ", amplitudes[i]);
 		if (amplitudes[i] > maxAmp) {
@@ -163,9 +169,10 @@ void fillAmplitudeArray() {
 		}
 	}
 	loudestIndex = maxAmpIndex;
-	printf("LOUDEST is mic %d\n", maxAmpIndex);
+	printf("\tLOUDEST is mic %d\n", maxAmpIndex);
 }
 
+/* calculates difference between min and max value within a mic's buffer */
 int getAmplitude(uint16_t *buffer) {
 	int max = 0;
 	int min = 4095;
@@ -177,12 +184,14 @@ int getAmplitude(uint16_t *buffer) {
 	return max - min;
 }
 
+/* prints the loudest mic in text on the display */
 void displayLoudest(int loudestIndex) {
 	char text[20];
 	sprintf(&text, "mosquito near mic %d", loudestIndex);
 	TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 }
 
+/* shows a bar graph of relative amplitudes of the different mics. This is very slow, we're probably better off using text */
 void displayAmplitudes() {
 	int colWidth = ILI9341_HEIGHT / NUM_MICS;
 	int x = 0;
@@ -239,10 +248,12 @@ int main(void)
 	
 	int prevLoudestIndex;
 	while (1) {
+		//only update display text when it has changed
 		if (loudestIndex != prevLoudestIndex) {
 			displayLoudest(loudestIndex);
 			prevLoudestIndex = loudestIndex;
 		}
+		//when the mic buffers are full, we report the amplitudes
 		if (bufferPos == (BUFFERSIZE - 1)) {
 			fillAmplitudeArray();
 		}
