@@ -362,13 +362,13 @@ int main(void)
 	//init adc dma system for mics
 	configureADC();
 	//Initialize ILI9341
-	//TM_ILI9341_Init();
+	TM_ILI9341_Init();
 	
 	//Rotate LCD for 90 degrees
-	//TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_1);
+	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_1);
 
 	//displayWelcomeScreen();
-	//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
+	TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 	/*for(int i = 0; i < 64; i++){
 	  printf("%f\n",D_N_2[i]);
 	  }*/
@@ -376,15 +376,19 @@ int main(void)
 	init_serial_port_usb();
 	delay_ms(1000);
 #endif
-
+	char text[20];
 	while(1){ //The primary While(1) loop
 	  obtainSample();
 	  float32_t Dist = calc_distance();
 	  float32_t Ang = calc_ang();
 	  if(Dist < 7){
-	    printf("D:%f, A:%f\n", Dist, Ang);
+	    sprintf(&text, "Distance: %f, Angle: %f", Dist, Ang);
+	    TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+	    //printf("D:%f, A:%f\n", Dist, Ang);
 	  } else {
-	    printf("No Mosquito Detections\n");
+	    sprintf(&text, "No Mosquito Detected");
+	    TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+	    //printf("No Mosquito Detections\n");
 	  }
 	  delay_ms(200);
 
