@@ -156,9 +156,24 @@ Our display was connected to the board as shown in Figure 4.
 
 We wrote the Display and Microphone code in two separate Git branches. Since they both used the DMA controller we had to separate their functionality onto two separate DMA streams when we merged the branches. The ADC uses DMA2-Stream4 whereas the display used DMA2-Stream0.
 
-\subsection{Signal Processing and Machine Learning}
-asdflkjasdflkjasdf;lkjasdf;lkj
+DMA-SPI lib: http://stm32f4-discovery.net/2016/04/hal-library-33-dma-extension-for-spi-on-stm32fxxx/
+ILI9341 lib: http://stm32f4-discovery.net/2014/04/library-08-ili9341-lcd-on-stm32f429-discovery-board/
 
+\subsection{Data Collection}
+We gathered audio data to train the neural network. 
+-- What was it audio of? Sine wave from phone from various distances from the mics?
+-- How did we transfer it to the computer? USB?
+-- How many data points did we collect?
+-- Do we know the sampling rate?
+
+\subsection{Signal Processing and Machine Learning}
+-- FFT?
+-- Neural Network?
+-- Interpreting the output of the neural network?
+-- What is the process of using WEKA?
+
+\subsection{Code Structure}
+He wants an explanation of the main loop.
 
 %------------------------------------------------
 
