@@ -305,14 +305,14 @@ float32_t calcNode(float32_t* data, float32_t* w, float32_t T){
   return sigmoid(sum);
 }
 
-float32_t linearNode(float32_t* data, float32_t* w, float32_t T){
-  float32_t dest[BUFFERSIZE * 4];
-  arm_mult_f32(data,w,&dest,BUFFERSIZE*4);
+float32_t linearNode(float32_t* data, float32_t* w, float32_t T, int n_nodes){
+  float32_t dest[n_nodes];
+  arm_mult_f32(data,w,&dest,n_nodes);
   float32_t sum = 0;
-  for(int i = 0; i < BUFFERSIZE * 4;i++) {
+  for(int i = 0; i < n_nodes;i++) {
     sum += dest[i];
   }
-  sum+=T;
+  sum += T;
   return sum;
 }
 
@@ -321,10 +321,15 @@ float32_t calc_distance(){
   hLayer[0] = calcNode(outputBuffer, D_N_1, D_N_1T);
   hLayer[1] = calcNode(outputBuffer, D_N_2, D_N_2T);
   hLayer[2] = calcNode(outputBuffer, D_N_3, D_N_3T);
-  return linearNode(hLayer, D_N_0, D_N_0T);
+  return linearNode(hLayer, D_N_0, D_N_0T, 3);
 }
 
-
+float32_t calc_ang(){
+  float32_t hLayer[2];
+  hLayer[0] = calcNode(outputBuffer, A_N_1, A_N_1T);
+  hLayer[1] = calcNode(outputBuffer, A_N_2, A_N_2T);
+  return linearNode(hLayer, A_N_0, A_N_0T,2);
+}
 
 int main(void)
 {
@@ -351,7 +356,8 @@ int main(void)
 
 	while(1){ //The primary While(1) loop
 	  obtainSample();
-	  
+	  float32_t Dist = calc_distance();
+	  float32_t Ang = calc_ang();
 	  delay_ms(500);
 
 
