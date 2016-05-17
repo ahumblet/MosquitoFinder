@@ -49,9 +49,16 @@ uint32_t ifftFlag = 0;
 uint32_t doBitReverse = 1;
 float32_t outputBuffer[BUFFERSIZE * 4];
 #endif
+#define USE_LR
 
-//#include "NN.h"
+#ifdef USE_NN
+#include "NN.h"
+#endif
+#ifdef USE_LR
 #include "LR.h"
+#endif
+
+
 #ifdef SERIAL
 #include "serial_port_usb/serial_port_usb.h"
 void read_line_from_serial_usb(char *s)
@@ -288,7 +295,9 @@ void obtainSample() {
   }
 
 }
-/*
+
+
+#ifdef USE_NN
 float32_t sigmoid(float32_t input) {
   float32_t eval = exp(-input);
   return 1.0/(1.0+eval);
@@ -315,7 +324,10 @@ float32_t linearNode(float32_t* data, float32_t* w, float32_t T, int n_nodes){
   sum += T;
   return sum;
 }
-*/
+#endif
+
+
+#ifdef USE_LR
 float32_t calc_distance(){
   float32_t dest[BUFFERSIZE * 4];
   arm_mult_f32(outputBuffer, D_C, &dest, BUFFERSIZE * 4);
@@ -336,9 +348,10 @@ float32_t calc_ang(){
   sum += A_T;
   return sum;
 }
+#endif
 
+#ifdef USE_NN
 
-/*
 float32_t calc_distance(){
   float32_t hLayer[3];
   hLayer[0] = calcNode(outputBuffer, D_N_1, D_N_1T);
@@ -353,7 +366,8 @@ float32_t calc_ang(){
   hLayer[1] = calcNode(outputBuffer, A_N_2, A_N_2T);
   return linearNode(hLayer, A_N_0, A_N_0T,2);
 }
-*/
+
+#endif
 int main(void)
 {
 	//Initialize system
@@ -369,7 +383,7 @@ int main(void)
 
 	displayWelcomeScreen();
 	delay_ms(3000);
-	TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
+	TM_ILI9341_Fill(ILI9341_COLOR_WHITE);//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 	/*for(int i = 0; i < 64; i++){
 	  printf("%f\n",D_N_2[i]);
 	  }*/
@@ -383,14 +397,15 @@ int main(void)
 	  float32_t Dist = calc_distance();
 	  float32_t Ang = calc_ang();
 	  if(Dist < 6.5){
-	    sprintf(&text, "Distance: %3.1f, Angle: %3.1f", Dist, Ang);
-	    TM_ILI9341_Puts(20, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+	    TM_ILI9341_Fill(ILI9341_COLOR_WHITE);
+	    sprintf(&text, "Distance: %3.1f \nAngle: %3.1f", Dist, Ang);
+	    TM_ILI9341_Puts(15, ILI9341_WIDTH / 3, text, &TM_Font_16x26, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 	    //printf("D:%f, A:%f\n", Dist, Ang);
 	  } else {
-	  TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
-	    sprintf(&text, "No Mosquito Detected");
-	    TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
-	    //printf("No Mosquito Detections\n");
+	    TM_ILI9341_Fill(ILI9341_COLOR_WHITE);//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
+	    sprintf(&text, "No Detections");
+	    TM_ILI9341_Puts(30, ILI9341_WIDTH / 3, text, &TM_Font_16x26, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+	    //printf("No Detections\n");
 	  }
 	  
 	  delay_ms(200);
