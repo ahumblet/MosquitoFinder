@@ -53,6 +53,8 @@ uint32_t doBitReverse = 1;
 uint32_t refIndex = 213, testIndex = 0;
 #endif
 
+#include "NN.h"
+
 #ifdef SERIAL
 #include "serial_port_usb/serial_port_usb.h"
 void read_line_from_serial_usb(char *s)
@@ -308,7 +310,9 @@ int main(void)
 
 	//displayWelcomeScreen();
 	//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
-
+	for(int i = 0; i < 64; i++){
+	  printf("%f\n",D_N_2[i]);
+	  }
 #ifdef SERIAL
 	init_serial_port_usb();
 	delay_ms(1000);
