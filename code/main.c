@@ -305,10 +305,26 @@ float32_t calcNode(float32_t* data, float32_t* w, float32_t T){
   return sigmoid(sum);
 }
 
+float32_t linearNode(float32_t* data, float32_t* w, float32_t T){
+  float32_t dest[BUFFERSIZE * 4];
+  arm_mult_f32(data,w,&dest,BUFFERSIZE*4);
+  float32_t sum = 0;
+  for(int i = 0; i < BUFFERSIZE * 4;i++) {
+    sum += dest[i];
+  }
+  sum+=T;
+  return sum;
+}
+
 float32_t calc_distance(){
   float32_t hLayer[3];
-  hLayer[0] = calcNode(D_N_1
+  hLayer[0] = calcNode(outputBuffer, D_N_1, D_N_1T);
+  hLayer[1] = calcNode(outputBuffer, D_N_2, D_N_2T);
+  hLayer[2] = calcNode(outputBuffer, D_N_3, D_N_3T);
+  return linearNode(hLayer, D_N_0, D_N_0T);
 }
+
+
 
 int main(void)
 {
