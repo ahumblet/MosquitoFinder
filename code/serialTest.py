@@ -5,7 +5,10 @@ import struct
 
 ser = serial.Serial('/dev/ttyACM0')
 #input("Press Enter to Start...")
-num
+num = input("Sample number: ")
+file = str(num)
+file = file + ".p"
+print(file)
 dist = input("Distance: ")
 angle = input("Angle: ")
 startByte = b'a'
@@ -21,3 +24,4 @@ for i in range(length[0]):
         s = struct.unpack('f',g)
         q.append(s[0])
 print(q)
+pickle.dump(q,open(file,"wb"))
