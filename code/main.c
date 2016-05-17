@@ -309,46 +309,12 @@ int main(void)
 	//displayWelcomeScreen();
 	//TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 
-#ifdef FFT
-	//float32_t maxValue; 	
-	// arm_cfft_radix4_instance_f32 S; 	
-	// arm_cfft_radix4_init_f32(&S, fftSize, ifftFlag, doBitReverse);
-	// arm_cfft_radix4_f32(&S, testInput_f32_10khz);
-	// arm_cmplx_mag_f32(testInput_f32_10khz, testOutput, fftSize);  
-	// arm_max_f32(testOutput, fftSize, &maxValue, &testIndex); 
-	// printf("The Max Value is: %f, at %d\n", maxValue, testIndex);
-#endif
-
 #ifdef SERIAL
 	init_serial_port_usb();
 	delay_ms(1000);
 #endif
-#ifndef SERIAL
-	TIM_Cmd(TIM2, ENABLE);
-#endif
-
 	while(1){
-
-#ifndef SERIAL
-	  if(ready){
-	    TIM_Cmd(TIM2, DISABLE);
-	    ready = 0;
-	    
-	    int lmax = 0;
-	    for(int i = 0; i < BUFFERSIZE; i++) {
-	      int val = mic3Buffer[i];
-	      if(val > lmax) lmax = val;
-	    }
-	    printf("Max: %d\n", lmax);
-	    delay_ms(3000);
-	    printf("Enabled!\n");
-	    TIM_Cmd(TIM2, ENABLE);
-	  }
-#endif
-
 #ifdef SERIAL
-	  //write_serial_usb_bytes("Hello\n", 6);
-
 	  while (1)
 	    {
 	      uint8_t c;
@@ -357,23 +323,12 @@ int main(void)
 		{
 		  if(c == 'a'){
 		    obtainSample();
-		    /*
-		    int length = 2;
-		    float32_t data = 16.16;
-		    float32_t data2 = 17.17;
-		    write_serial_usb_bytes(&length, 4);  
-		    write_serial_usb_bytes(&data, 4);
-		    write_serial_usb_bytes(&data2, 4);
-		    */
 		  }
-
 		}
 	      else break; // if no more characters at the current time
 	    }
-	  delay_ms(1000);
+	  delay_ms(100);
 #endif
-
-
 	}
 }
 
