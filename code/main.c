@@ -18,15 +18,19 @@
 #include "stm32f4xx_rcc.h"
 
 
-#define BUFFERSIZE 5
-volatile uint16_t ADCBuffer[] = {5, 5, 5, 5};
+//buffer for DMA
+#define NUM_MICS 4
+volatile uint16_t ADCBuffer[NUM_MICS];
+
+//Buffers of samples, one for each mic
+#define BUFFERSIZE 10
+int bufferPos = 0;
 uint16_t mic0Buffer[BUFFERSIZE];
 uint16_t mic1Buffer[BUFFERSIZE];
 uint16_t mic2Buffer[BUFFERSIZE];
 uint16_t mic3Buffer[BUFFERSIZE];
 
-#define NUM_MICS 4
-int micCounter = 0;
+//amplitude of all 4 mics
 int amplitudes[NUM_MICS];
 int loudestIndex = 0;
 
@@ -49,7 +53,7 @@ void configureADC() {
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_Period = 1999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 5000;
+	TIM_TimeBaseStructure.TIM_Prescaler = 4000;
 	//	TIM_TimeBaseStructure.TIM_Prescaler = 17999;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 	TIM_SelectOutputTrigger(TIM2,TIM_TRGOSource_Update);
@@ -115,10 +119,10 @@ void configureADC() {
 	ADC_TempSensorVrefintCmd(ENABLE);
  
 	/* Configure channels */
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_144Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_144Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_144Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_112Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_112Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_112Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_112Cycles);
  
 	/* Enable DMA request after last transfer (Single-ADC mode) */
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
@@ -134,36 +138,25 @@ void configureADC() {
 void TIM2_IRQHandler() {
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	
-	micCounter = (micCounter + 1) % BUFFERSIZE;
-	mic0Buffer[micCounter] = ADCBuffer[0];
-	mic1Buffer[micCounter] = ADCBuffer[1];
-	mic2Buffer[micCounter] = ADCBuffer[2];
-	mic3Buffer[micCounter] = ADCBuffer[3];
-	
-	int min0 = 0;
-	int max0 = 0;
-	getMinMax(mic0Buffer, &min0, &max0);
-	amplitudes[0] = max0 - min0;
+	printf("IRQ handler\n");
+	mic0Buffer[bufferPos] = ADCBuffer[0];
+	mic1Buffer[bufferPos] = ADCBuffer[1];
+	mic2Buffer[bufferPos] = ADCBuffer[2];
+	mic3Buffer[bufferPos] = ADCBuffer[3];
+	bufferPos = (bufferPos + 1) % BUFFERSIZE;
+}
 
-	int min1 = 0;
-	int max1 = 0;
-	getMinMax(mic1Buffer, &min1, &max1);
-	amplitudes[1] = max1 - min1;
-
-	int min2 = 0;
-	int max2 = 0;
-	getMinMax(mic2Buffer, &min2, &max2);
-	amplitudes[2] = max2 - min2;
-	
-	int min3 = 0;
-	int max3 = 0;
-	getMinMax(mic3Buffer, &min3, &max3);
-	amplitudes[3] = max3 - min3;
+void fillAmplitudeArray() {
+	amplitudes[0] = getAmplitude(mic0Buffer);
+	amplitudes[1] = getAmplitude(mic1Buffer);
+	amplitudes[2] = getAmplitude(mic2Buffer);
+	amplitudes[3] = getAmplitude(mic3Buffer);
 	
 	int maxAmpIndex = 0;
 	int maxAmp = amplitudes[0];
+	printf("amplitudes: ");
 	for (int i = 0; i < NUM_MICS; i++) {
-		//printf("%d, ", amplitudes[i]);
+		printf("%d, ", amplitudes[i]);
 		if (amplitudes[i] > maxAmp) {
 			maxAmpIndex = i;
 			maxAmp = amplitudes[i];
@@ -171,6 +164,23 @@ void TIM2_IRQHandler() {
 	}
 	loudestIndex = maxAmpIndex;
 	printf("LOUDEST is mic %d\n", maxAmpIndex);
+}
+
+int getAmplitude(uint16_t *buffer) {
+	int max = 0;
+	int min = 4095;
+	for (int i = 0; i < BUFFERSIZE; i++) {
+		int val = buffer[i];
+		if (val < min) min = val;
+		if (val > max) max = val;
+	}
+	return max - min;
+}
+
+void displayLoudest(int loudestIndex) {
+	char text[20];
+	sprintf(&text, "mosquito near mic %d", loudestIndex);
+	TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 }
 
 void displayAmplitudes() {
@@ -184,18 +194,6 @@ void displayAmplitudes() {
 		TM_ILI9341_DrawFilledRectangle(x, topY, x+colWidth, 0, ILI9341_COLOR_WHITE);
 		x += colWidth;
 	}
-}
-
-void getMinMax(uint16_t *buffer, int *bmin, int *bmax) {
-	int max = 0;
-	int min = 4095;
-	for (int i = 0; i < BUFFERSIZE; i++) {
-		int val = buffer[i];
-		if (val < min) min = val;
-		if (val > max) max = val;
-	}
-	*bmin = min;
-	*bmax = max;
 }
 
 void displayWelcomeScreen() {
@@ -237,10 +235,17 @@ int main(void)
 	TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_1);
 
 	displayWelcomeScreen();
+	TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 	
 	int prevLoudestIndex;
 	while (1) {
-		displayAmplitudes();
+		if (loudestIndex != prevLoudestIndex) {
+			displayLoudest(loudestIndex);
+			prevLoudestIndex = loudestIndex;
+		}
+		if (bufferPos == (BUFFERSIZE - 1)) {
+			fillAmplitudeArray();
+		}
 	}
 }
 
