@@ -8,6 +8,7 @@
 
 
 #define SERIAL
+#define FFT
 
 #ifdef SERIAL
 #include "serial_port_usb/serial_port_usb.h"
@@ -131,22 +132,34 @@ init_serial_port_usb();
 char s[128];
 delay_ms(3000);
 int n_input = 0;
+
 #endif
 
 
 while (1) {
 
 #ifdef SERIAL
-write_serial_usb_bytes("Hello\n", 6);
+//write_serial_usb_bytes("Hello\n", 6);
+
 while (1)
-    {
-      uint8_t c;
-      uint8_t read_byte = read_serial_usb_byte(&c); // read one character
-      if (read_byte == 1) // if a character was read
-      {
-        write_serial_usb_bytes(&c,1); // echo the character back to the USB serial port
-        n_input ++;
-      }
+  {
+   uint8_t c;
+   uint8_t read_byte = read_serial_usb_byte(&c); // read one character
+   if (read_byte == 1) // if a character was read
+     {
+       if(c == 'a'){
+         //float g = 515.123;
+         //write_serial_usb_bytes(&g,4); // 
+int length = 2;
+float32_t data = 16.16;
+float32_t data2 = 17.17;
+write_serial_usb_bytes(&length, 4);  
+write_serial_usb_bytes(&data, 4);
+write_serial_usb_bytes(&data2, 4);
+
+        }
+
+     }
       else break; // if no more characters at the current time
     }
 delay_ms(1000);
