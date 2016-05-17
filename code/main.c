@@ -257,6 +257,11 @@ void displayWelcomeScreen() {
 	TM_ILI9341_Puts(30, 180, "Adrienne Humblet\nAlex Thomson", &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 }
 
+void sendSerialData(float32_t* data, uint32_t length) {
+
+
+}
+
 void obtainSample() {
   float32_t outputBuffer[BUFFERSIZE * 4];
   arm_cfft_radix4_instance_f32 S;
@@ -348,15 +353,15 @@ int main(void)
 	      if (read_byte == 1) // if a character was read
 		{
 		  if(c == 'a'){
-		    //float g = 515.123;
-		    //write_serial_usb_bytes(&g,4); // 
+		    obtainSample();
+		    /*
 		    int length = 2;
 		    float32_t data = 16.16;
 		    float32_t data2 = 17.17;
 		    write_serial_usb_bytes(&length, 4);  
 		    write_serial_usb_bytes(&data, 4);
 		    write_serial_usb_bytes(&data2, 4);
-
+		    */
 		  }
 
 		}
