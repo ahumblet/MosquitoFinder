@@ -1,0 +1,299 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.MultilayerPerceptron -L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H 3
+Relation:     Dist_FFT
+Instances:    120
+Attributes:   65
+              FFT_0
+              FFT_1
+              FFT_2
+              FFT_3
+              FFT_4
+              FFT_5
+              FFT_6
+              FFT_7
+              FFT_8
+              FFT_9
+              FFT_10
+              FFT_11
+              FFT_12
+              FFT_13
+              FFT_14
+              FFT_15
+              FFT_16
+              FFT_17
+              FFT_18
+              FFT_19
+              FFT_20
+              FFT_21
+              FFT_22
+              FFT_23
+              FFT_24
+              FFT_25
+              FFT_26
+              FFT_27
+              FFT_28
+              FFT_29
+              FFT_30
+              FFT_31
+              FFT_32
+              FFT_33
+              FFT_34
+              FFT_35
+              FFT_36
+              FFT_37
+              FFT_38
+              FFT_39
+              FFT_40
+              FFT_41
+              FFT_42
+              FFT_43
+              FFT_44
+              FFT_45
+              FFT_46
+              FFT_47
+              FFT_48
+              FFT_49
+              FFT_50
+              FFT_51
+              FFT_52
+              FFT_53
+              FFT_54
+              FFT_55
+              FFT_56
+              FFT_57
+              FFT_58
+              FFT_59
+              FFT_60
+              FFT_61
+              FFT_62
+              FFT_63
+              Dist
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Linear Node 0
+    Inputs    Weights
+    Threshold    1.4782809559779955
+    Node 1    -0.9327226712454727
+    Node 2    -1.0814397705510306
+    Node 3    -0.5032799972105317
+Sigmoid Node 1
+    Inputs    Weights
+    Threshold    2.649080595600005
+    Attrib FFT_0    -0.09739672077681905
+    Attrib FFT_1    -0.011885656176493864
+    Attrib FFT_2    -0.09402264522256079
+    Attrib FFT_3    0.11976094050846045
+    Attrib FFT_4    -0.07813695976024372
+    Attrib FFT_5    0.04306167307984148
+    Attrib FFT_6    -0.27301110529656386
+    Attrib FFT_7    -0.0015963669320947615
+    Attrib FFT_8    -0.009007366458848271
+    Attrib FFT_9    -0.05236883688409562
+    Attrib FFT_10    -0.2910297416177588
+    Attrib FFT_11    0.011194503105511401
+    Attrib FFT_12    -0.10627216053306048
+    Attrib FFT_13    0.14104359594673402
+    Attrib FFT_14    -0.07445226865911855
+    Attrib FFT_15    -0.0020440711852643895
+    Attrib FFT_16    0.08911343334771409
+    Attrib FFT_17    0.19536317600645248
+    Attrib FFT_18    0.3306688583995356
+    Attrib FFT_19    0.42185183130542064
+    Attrib FFT_20    0.40789609531831306
+    Attrib FFT_21    0.39764977744099517
+    Attrib FFT_22    0.18861626894475556
+    Attrib FFT_23    -0.19917143824244787
+    Attrib FFT_24    -0.8087307013392868
+    Attrib FFT_25    -0.2034339482259715
+    Attrib FFT_26    0.15972170866805954
+    Attrib FFT_27    0.3666610524803605
+    Attrib FFT_28    0.41269640817989584
+    Attrib FFT_29    0.4492256542229301
+    Attrib FFT_30    0.32468593888930514
+    Attrib FFT_31    0.1650719986743393
+    Attrib FFT_32    -0.05808623522284695
+    Attrib FFT_33    0.31496220663398283
+    Attrib FFT_34    0.7718011070329706
+    Attrib FFT_35    0.3088873891651817
+    Attrib FFT_36    0.26406647423299845
+    Attrib FFT_37    -0.34443381859080163
+    Attrib FFT_38    0.5246293077937089
+    Attrib FFT_39    -0.057700696586939396
+    Attrib FFT_40    0.28153169564293984
+    Attrib FFT_41    -0.09862517779798972
+    Attrib FFT_42    0.4745781920699538
+    Attrib FFT_43    -0.39542778624074754
+    Attrib FFT_44    0.2405373427861586
+    Attrib FFT_45    0.2717025230336991
+    Attrib FFT_46    0.8248278409434197
+    Attrib FFT_47    0.2677634445595111
+    Attrib FFT_48    0.19010207175488905
+    Attrib FFT_49    0.02983114601460218
+    Attrib FFT_50    0.1495317706255099
+    Attrib FFT_51    -0.21474062980968422
+    Attrib FFT_52    0.18318863250727355
+    Attrib FFT_53    -0.10786724703777405
+    Attrib FFT_54    0.04597277088696022
+    Attrib FFT_55    0.2590022555820285
+    Attrib FFT_56    -0.28511965908782716
+    Attrib FFT_57    0.24075033997830353
+    Attrib FFT_58    0.026449963103799008
+    Attrib FFT_59    -0.19209386377995588
+    Attrib FFT_60    0.253732727892395
+    Attrib FFT_61    -0.18544076409267313
+    Attrib FFT_62    0.21042724608127336
+    Attrib FFT_63    0.07774741265377562
+Sigmoid Node 2
+    Inputs    Weights
+    Threshold    6.320758064749513
+    Attrib FFT_0    -0.647891436087296
+    Attrib FFT_1    -0.06148553554454381
+    Attrib FFT_2    -0.0580848419931053
+    Attrib FFT_3    0.5636249669410109
+    Attrib FFT_4    -0.5793583350730727
+    Attrib FFT_5    0.22408163341085735
+    Attrib FFT_6    0.015374982442066889
+    Attrib FFT_7    0.5481615178336583
+    Attrib FFT_8    -0.06301440335407772
+    Attrib FFT_9    0.5494528286565479
+    Attrib FFT_10    0.011353489892760167
+    Attrib FFT_11    0.21109501691492505
+    Attrib FFT_12    -0.5764898411134747
+    Attrib FFT_13    0.5799518913961572
+    Attrib FFT_14    -0.02162634589932217
+    Attrib FFT_15    -0.12325449065675444
+    Attrib FFT_16    0.5953877484407785
+    Attrib FFT_17    -0.1627801421450526
+    Attrib FFT_18    1.1312533744882467
+    Attrib FFT_19    1.022315031815541
+    Attrib FFT_20    -0.41625865204642576
+    Attrib FFT_21    -0.5428200321907611
+    Attrib FFT_22    -0.5246301133045788
+    Attrib FFT_23    -1.5849115067296373
+    Attrib FFT_24    -1.4730061042502864
+    Attrib FFT_25    -1.5940255333035154
+    Attrib FFT_26    -0.5901153097926466
+    Attrib FFT_27    -0.46507910698956617
+    Attrib FFT_28    -0.3947093374548767
+    Attrib FFT_29    0.989484388692307
+    Attrib FFT_30    1.0860052339616786
+    Attrib FFT_31    -0.17714010906452493
+    Attrib FFT_32    0.3359664591668697
+    Attrib FFT_33    0.17038617022351174
+    Attrib FFT_34    2.4721405056860717
+    Attrib FFT_35    0.7111995695050155
+    Attrib FFT_36    0.5613789755452094
+    Attrib FFT_37    -0.5069688448296839
+    Attrib FFT_38    0.3582324353895147
+    Attrib FFT_39    -1.2178637667176695
+    Attrib FFT_40    -1.2684126720707973
+    Attrib FFT_41    -1.2415117652748628
+    Attrib FFT_42    0.2971680580247424
+    Attrib FFT_43    -0.4838121755487122
+    Attrib FFT_44    0.5830441609838637
+    Attrib FFT_45    0.80520426705178
+    Attrib FFT_46    2.3967493066996313
+    Attrib FFT_47    0.11704050885723669
+    Attrib FFT_48    -0.3847256649355801
+    Attrib FFT_49    0.046279596542893806
+    Attrib FFT_50    1.9080541902073314
+    Attrib FFT_51    0.5747953100513992
+    Attrib FFT_52    0.35736763069628064
+    Attrib FFT_53    0.32866422178978105
+    Attrib FFT_54    0.40925879262228876
+    Attrib FFT_55    0.5082853902551673
+    Attrib FFT_56    0.8969404582887418
+    Attrib FFT_57    0.539470739245132
+    Attrib FFT_58    0.3440448538921567
+    Attrib FFT_59    0.33717480869345395
+    Attrib FFT_60    0.30980169243785594
+    Attrib FFT_61    0.5529576517415469
+    Attrib FFT_62    1.9658079305455425
+    Attrib FFT_63    0.06896827745658199
+Sigmoid Node 3
+    Inputs    Weights
+    Threshold    3.4326144519110247
+    Attrib FFT_0    0.12233021852590573
+    Attrib FFT_1    0.2635139827306155
+    Attrib FFT_2    0.39267979056153984
+    Attrib FFT_3    0.3343292266691581
+    Attrib FFT_4    0.4106946616415193
+    Attrib FFT_5    -0.1396598251072778
+    Attrib FFT_6    0.7248347574823617
+    Attrib FFT_7    0.2608048899862381
+    Attrib FFT_8    0.12390325264451685
+    Attrib FFT_9    0.2542776979989072
+    Attrib FFT_10    0.8031115605182022
+    Attrib FFT_11    -0.1647740474663253
+    Attrib FFT_12    0.39402813485091875
+    Attrib FFT_13    0.42915177906564705
+    Attrib FFT_14    0.3620659973723988
+    Attrib FFT_15    0.24022596253423253
+    Attrib FFT_16    0.3680715363727423
+    Attrib FFT_17    0.31610140450562024
+    Attrib FFT_18    1.0188275789624985
+    Attrib FFT_19    0.784526137062174
+    Attrib FFT_20    0.18969944489878646
+    Attrib FFT_21    0.09719186903474239
+    Attrib FFT_22    -0.34357705439767056
+    Attrib FFT_23    -1.115685890950758
+    Attrib FFT_24    -0.6266282852731777
+    Attrib FFT_25    -1.0911531869010882
+    Attrib FFT_26    -0.31989019792511203
+    Attrib FFT_27    0.1377041902763282
+    Attrib FFT_28    0.12926755869365616
+    Attrib FFT_29    0.7202111892716446
+    Attrib FFT_30    1.046532910879465
+    Attrib FFT_31    0.2919554874461923
+    Attrib FFT_32    -0.11418493516779424
+    Attrib FFT_33    0.18220432634452213
+    Attrib FFT_34    1.474555868151438
+    Attrib FFT_35    0.4076424883073864
+    Attrib FFT_36    0.7561409618862688
+    Attrib FFT_37    0.16148254103021495
+    Attrib FFT_38    0.06948030598829658
+    Attrib FFT_39    -0.8598130156457163
+    Attrib FFT_40    -0.5911742558778176
+    Attrib FFT_41    -0.9294402062694508
+    Attrib FFT_42    0.06662497103025795
+    Attrib FFT_43    0.20694429650395144
+    Attrib FFT_44    0.7929594249802857
+    Attrib FFT_45    0.4057303721155297
+    Attrib FFT_46    1.4149189244628553
+    Attrib FFT_47    0.1334938273895964
+    Attrib FFT_48    -0.2575511389476186
+    Attrib FFT_49    -1.0249982155995057
+    Attrib FFT_50    -0.11099158078266391
+    Attrib FFT_51    -0.7236557636972111
+    Attrib FFT_52    -0.2542411795769133
+    Attrib FFT_53    0.3020558809523881
+    Attrib FFT_54    -0.39541546592811355
+    Attrib FFT_55    -0.06046185552396871
+    Attrib FFT_56    0.3639774135475014
+    Attrib FFT_57    -0.13900853223116955
+    Attrib FFT_58    -0.43156745626199894
+    Attrib FFT_59    0.21420831280038757
+    Attrib FFT_60    -0.23831644927004977
+    Attrib FFT_61    -0.7800333924790775
+    Attrib FFT_62    -0.09555716585150076
+    Attrib FFT_63    -1.0455191396299457
+Class 
+    Input
+    Node 0
+
+
+Time taken to build model: 0.26 seconds
+
+=== Cross-validation ===
+=== Summary ===
+
+Correlation coefficient                  0.9929
+Mean absolute error                      0.1807
+Root mean squared error                  0.2308
+Relative absolute error                 10.2272 %
+Root relative squared error             11.9131 %
+Total Number of Instances              120     
+
