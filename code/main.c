@@ -50,8 +50,8 @@ uint32_t doBitReverse = 1;
 float32_t outputBuffer[BUFFERSIZE * 4];
 #endif
 
-#include "NN.h"
-
+//#include "NN.h"
+#include "LR.h"
 #ifdef SERIAL
 #include "serial_port_usb/serial_port_usb.h"
 void read_line_from_serial_usb(char *s)
@@ -317,6 +317,14 @@ float32_t linearNode(float32_t* data, float32_t* w, float32_t T, int n_nodes){
 }
 
 float32_t calc_distance(){
+
+}
+
+float32_t calc_ang(){
+
+}
+/*
+float32_t calc_distance(){
   float32_t hLayer[3];
   hLayer[0] = calcNode(outputBuffer, D_N_1, D_N_1T);
   hLayer[1] = calcNode(outputBuffer, D_N_2, D_N_2T);
@@ -330,7 +338,7 @@ float32_t calc_ang(){
   hLayer[1] = calcNode(outputBuffer, A_N_2, A_N_2T);
   return linearNode(hLayer, A_N_0, A_N_0T,2);
 }
-
+*/
 int main(void)
 {
 	//Initialize system
