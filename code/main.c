@@ -358,6 +358,7 @@ int main(void)
 	  obtainSample();
 	  float32_t Dist = calc_distance();
 	  float32_t Ang = calc_ang();
+	  printf("D:%f, A:%f\n", Dist, Ang);
 	  delay_ms(500);
 
 
