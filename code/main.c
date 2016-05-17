@@ -31,7 +31,7 @@ uint16_t mic0Buffer[BUFFERSIZE];
 uint16_t mic1Buffer[BUFFERSIZE];
 uint16_t mic2Buffer[BUFFERSIZE];
 uint16_t mic3Buffer[BUFFERSIZE];
-float32_t outputBuffer[BUFFERSIZE * 4];
+
 uint16_t * micBuffers[4];
 uint32_t ready = 0;
 
@@ -47,7 +47,7 @@ static float32_t magOutput[BUFFERSIZE];
 uint32_t fftSize = BUFFERSIZE; 
 uint32_t ifftFlag = 0; 
 uint32_t doBitReverse = 1;
-uint32_t refIndex = 213, testIndex = 0;
+float32_t outputBuffer[BUFFERSIZE * 4];
 #endif
 
 #include "NN.h"

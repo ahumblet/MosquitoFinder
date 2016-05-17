@@ -81,6 +81,7 @@ SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/TransformFunctions/arm_cfft
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/ComplexMathFunctions/arm_cmplx_mag_f32.c
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/StatisticsFunctions/arm_max_f32.c
 SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c
+SRCS += $(STM_COMMON)/Libraries/CMSIS/DSP_Lib/Source/BasicMathFunctions/arm_mult_f32.c
 
 #SRCS += $(STM_COMMON)/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
 SERIAL_PORT_USB_SRCS = stm32f4xx_it.c serial_port_usb/serial_port_usb.c serial_port_usb/usb_bsp.c serial_port_usb/usbd_cdc_vcp.c serial_port_usb/usbd_desc.c serial_port_usb/usbd_usr.c
