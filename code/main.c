@@ -382,14 +382,16 @@ int main(void)
 	  float32_t Dist = calc_distance();
 	  float32_t Ang = calc_ang();
 	  if(Dist < 7){
-	    sprintf(&text, "Distance: %f, Angle: %f", Dist, Ang);
-	    TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
+	    sprintf(&text, "Distance: %3.1f, Angle: %3.1f", Dist, Ang);
+	    TM_ILI9341_Puts(20, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 	    //printf("D:%f, A:%f\n", Dist, Ang);
 	  } else {
+	  TM_ILI9341_DrawFilledRectangle(0, 0, ILI9341_HEIGHT, ILI9341_WIDTH, ILI9341_COLOR_WHITE);
 	    sprintf(&text, "No Mosquito Detected");
 	    TM_ILI9341_Puts(30, 180, text, &TM_Font_11x18, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE);
 	    //printf("No Mosquito Detections\n");
 	  }
+	  
 	  delay_ms(200);
 
 
