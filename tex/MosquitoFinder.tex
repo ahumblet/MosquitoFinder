@@ -160,20 +160,20 @@ DMA-SPI lib: http://stm32f4-discovery.net/2016/04/hal-library-33-dma-extension-f
 ILI9341 lib: http://stm32f4-discovery.net/2014/04/library-08-ili9341-lcd-on-stm32f429-discovery-board/
 
 \subsection{Data Collection}
-We gathered audio data to train the neural network. 
--- What was it audio of? Sine wave from phone from various distances from the mics?
--- How did we transfer it to the computer? USB?
--- How many data points did we collect?
--- Do we know the sampling rate?
+Data needed to be obtained from the system in order to create and train a neural network capable of determining the angle and distance of a sound source. This was done using serial USB communication between the board and a computer. When compiled with the 'SERIAL' flag defined, the system will read the serial input waiting for a special character. After receiving this character, the system will take a sample, process the FFT and then transmit the data back over the serial line. A python program was written to collect and save this data.
+
+The training set consisted of 120 samples, 10 samples taken at 3 different angles and 4 different distances along those angles. This data was then assembled by another small python program into a file format usable by WEKA, where the neural net was trained.
 
 \subsection{Signal Processing and Machine Learning}
 -- FFT?
 -- Neural Network?
 -- Interpreting the output of the neural network?
--- What is the process of using WEKA?
+-- Drop data set into weka, choose learning parameters, run algoritm, check error on training set. See file 'DistOUT.txt' and 'AngOUT.txt'
 
 \subsection{Code Structure}
-He wants an explanation of the main loop.
+Essentially the hardware is initialized, the main screen is shown and then the main loop is run. The main loop obtains a sample, then calculates its estimate of the distance and angle, then displays the result. Under the data collection mode, the system does the same thing, but waits for serial input to trigger the data collection. Functions were defined to calculate a general neural network output, and the specific coefficients trained by WEKA reside in the 'NN.h' file as global variables.
+
+The most important and most used function is 'obtainSample()' which activates the interrupt timer, beginning data collection. It then takes the gathered samples, performs the FFT and assembles the data into one output array. The functions 'calc\_distance()' and calc\_ang()' then perform the neural network calculations if the macro 'USE\_NN' is defined, or perform a linear regression if the macro 'USE\_LR' is defined. The result is output to the screen using library functions.
 
 %------------------------------------------------
 

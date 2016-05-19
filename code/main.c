@@ -391,6 +391,7 @@ int main(void)
 	init_serial_port_usb();
 	delay_ms(1000);
 #endif
+#ifndef SERIAL
 	char text[20];
 	while(1){ //The primary While(1) loop
 	  obtainSample();
@@ -409,7 +410,7 @@ int main(void)
 	  }
 	  
 	  delay_ms(200);
-
+#endif
 
 
 
